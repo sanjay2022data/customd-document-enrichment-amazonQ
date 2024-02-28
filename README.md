@@ -10,3 +10,4 @@ arn:aws:lambda:us-east-1:770693421928:layer:Klayers-p39-pdf2image:1
 poppler
 
 
+https://github.com/jeylabs/aws-lambda-poppler-layer?tab=readme-ov-file
