@@ -31,21 +31,30 @@ def lambda_handler(event,context):
     logger.info("Received event: %s" % json.dumps(event))
     s3Bucket = event.get("s3Bucket")
     s3ObjectKey = event.get("s3ObjectKey")
-    filename = os.path.basename(s3ObjectKey)
-    filename = filename.split(".")[0]
-   
-    
+    # filename = os.path.basename(s3ObjectKey)
+    # filename = filename.split(".")[0]
     metadata = event.get("metadata")
-    file_format = s3ObjectKey.lower().split('.')[-1]
-    if (file_format in ["jpg", "png"]):
-        afterCDE = image_handler(s3Bucket, s3ObjectKey)
+    # file_format = s3ObjectKey.lower().split('.')[-1]
+    # file_format = temp_obj.lower().split('.')[-1]
+    # if (file_format in ["jpg", "png"]):
+    copy_source = {
+    'Bucket': s3Bucket,
+    'Key': s3ObjectKey}
+    
+    dest_key = s3ObjectKey+".jpg"
+    s3.copy_object(CopySource=copy_source, Bucket=s3Bucket, Key=dest_key)
+    # Delete the original object
+    s3.delete_object(Bucket=s3Bucket, Key=s3ObjectKey)
+
+    afterCDE = image_handler(s3Bucket, dest_key)
         #filename = s3ObjectKey.split(".")[0]
-        new_key = 'cde_output/' + filename + '.txt'
-    else:
-        documentBeforeCDE = s3.get_object(Bucket = s3Bucket, Key = s3ObjectKey)
-        beforeCDE = documentBeforeCDE['Body'].read();
-        afterCDE = beforeCDE #Do Nothing for now
-        new_key = 'cde_output/' + filename
+    new_key = 'cde_output/' + dest_key + '.txt'
+        
+    # else:
+    #     documentBeforeCDE = s3.get_object(Bucket = s3Bucket, Key = s3ObjectKey)
+    #     beforeCDE = documentBeforeCDE['Body'].read();
+    #     afterCDE = beforeCDE #Do Nothing for now
+    #     new_key = 'cde_output/' + filename
     s3.put_object(Bucket = s3Bucket, Key = new_key, Body=afterCDE)
     
     return {
